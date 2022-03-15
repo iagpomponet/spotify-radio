@@ -5,13 +5,14 @@ import { logger } from "./util.js";
 const controller = new Controller();
 
 async function routes(req, res) {
+    const { constants, location, pages } = config;
     const { method, url } = req;
-    const { homeHTML, controllerHTML } = config?.pages;
+    const { homeHTML, controllerHTML } = pages;
 
     if (method === "GET" && url === "/") {
         // se rota /, redirecionar para /home
         res.writeHead(302, {
-            'Location': config.location.home
+            'Location': location.home
         });
 
         return res.end();
@@ -50,8 +51,15 @@ async function routes(req, res) {
     if (method === 'GET') {
         // saber content type
         // saber arquivo que chamou
-
         const { stream, type } = await controller.getFileStream(url);
+        const contentType = constants?.CONTENT_TYPE[type];
+
+        if (contentType) {
+            res.writeHead(200, {
+                'Content-Type': contentType
+            })
+        }
+
 
         return stream.pipe(res);
     }
